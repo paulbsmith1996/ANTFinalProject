@@ -1,6 +1,4 @@
 """
-Author - Paul Baird-Smith November 2017
-
 This program implements an interesting but likely unsound and expensive 
 cryptographic scheme for images. The goal here is to produce make our
 image data readable at every level or our encryption protocol: the plain
@@ -27,14 +25,15 @@ factorized and this factorization can then be used to break our system
 quickly, though this is not necessarily obvious for large images.
 
 Dependent on pygame and numpy libraries
-
-Any questions, email ppb366@cs.utexas.edu.  
 """
+
+
 # Imports
+import itertools
 import pygame
 import sys
 import numpy as np
-
+from PIL import Image
 
 
 
@@ -103,7 +102,17 @@ def decrypt_exp(encrypted_rgb, key):
 
     return index_to_rgb(decrypted_index)
 
+def decrypt_exp_2(encrypted_rgb, key, inv):
+    # Get the index associated to the encrypted pixel 
+    encrypted_index = rgb_to_index(encrypted_rgb)
 
+    # Find the index associated to the decrypte pixel, using our
+    # exponential inverse function
+    decrypted_index = exponentiation((256**3) + 1, 
+                                     encrypted_index, 
+                                     inv)
+
+    return index_to_rgb(decrypted_index)
 
 
 
@@ -216,6 +225,7 @@ def factorization(num):
 
 ##--------------------------- EXECUTABLE CODE ------------------------##
 
+IMAGE_NAME = "dog.jpg"
 
 # Set constants for graphics in pygame
 WIN_OFFSET = 10
@@ -227,7 +237,7 @@ WINDOW_WIDTH = (3 * IMAGE_WIDTH) + (4 * WIN_OFFSET)
 WINDOW_HEIGHT = IMAGE_HEIGHT + 2 * WIN_OFFSET
 
 # Determine the number of pixels in our desired image
-NUM_PIXELS = 625
+NUM_PIXELS = 2500
 SQRT_NUM_PIXELS = int(NUM_PIXELS ** 0.5)
 
 # Compute the width and height of each "pixel" in our image
@@ -243,11 +253,20 @@ screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 key = 24421
 
 # Generate a random array of pixel rgb's
-pixels = [np.random.randint(0, 256, 3) for i in range(NUM_PIXELS)]
+#pixels = [np.random.randint(0, 256, 3) for i in range(NUM_PIXELS)]
+
+im = Image.open(IMAGE_NAME)
+pix = im.load()
+pos_x = [(i * (im.size[0] - 1)) / (SQRT_NUM_PIXELS - 1) for i in range(SQRT_NUM_PIXELS)]
+pos_y = [(i * (im.size[1] - 1)) / (SQRT_NUM_PIXELS - 1) for i in range(SQRT_NUM_PIXELS)]
+positions = list(itertools.product(pos_x, pos_y))
+pixels = [pix[pos[0], pos[1]] for pos in positions]
 
 # Encrypt all the random pixels
 encrypted_pixels = [encrypt(pixel, key) for pixel in pixels]
 
+
+inv = slow_exp_inverse((256**3) + 1, key)
 
 # Produce our 3 images: the image on the left will be our "plaintext" image.
 # In the center we have the encrypted image, and on the right we have the 
@@ -262,8 +281,8 @@ for i in range(3):
     for j in range(len(pixels)):
 
         # Set the x, y, width, and length of the current pixel we are drawing
-        rectCoords = (WIN_OFFSET + i * (IMAGE_WIDTH + WIN_OFFSET) + (x * RECT_WIDTH), 
-                      WIN_OFFSET + (y * RECT_HEIGHT),
+        rectCoords = (WIN_OFFSET + i * (IMAGE_WIDTH + WIN_OFFSET) + (y * RECT_WIDTH), 
+                      WIN_OFFSET + (x * RECT_HEIGHT),
                       RECT_WIDTH,
                       RECT_HEIGHT)
 
@@ -282,7 +301,8 @@ for i in range(3):
             pygame.draw.rect(screen, encrypted_pixels[j], rectCoords, 0)
         elif (i == 2):
             # We are drawing our decrypted image
-            pygame.draw.rect(screen, decrypt_exp(encrypted_pixels[j], key), rectCoords, 0)
+            #pygame.draw.rect(screen, decrypt_exp(encrypted_pixels[j], key), rectCoords, 0)
+            pygame.draw.rect(screen, decrypt_exp_2(encrypted_pixels[j], key, inv), rectCoords, 0)
 
             # Update for sanity
             if(x % SQRT_NUM_PIXELS == 0):
