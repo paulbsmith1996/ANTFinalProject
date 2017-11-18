@@ -30,10 +30,13 @@ Dependent on pygame and numpy libraries
 
 # Imports
 import itertools
+import collections
 import pygame
 import sys
 import numpy as np
+
 from PIL import Image
+from time import sleep
 
 
 
@@ -196,6 +199,31 @@ def index_to_rgb(index):
     return new_rgb
 
 
+def list_to_matrix(list):
+
+    list_len = len(list)
+    mat = np.zeros([list_len, list_len])
+
+    for j in range(list_len):
+        mat[j, list[j]] =  1
+
+    return mat
+
+
+def matrix_to_list(mat):
+
+    list = []
+
+    for i in range(len(mat)):
+        for j in range(len(mat[0])):
+            if(mat[i, j] != 0):
+                list.append(j)
+                break
+
+    return list
+
+
+
 # Returns a list representation of the prime factors of num
 def factorization(num):
     
@@ -219,13 +247,88 @@ def factorization(num):
 
     return factors
 
+def compare_pixels(pixel_list_1, pixel_list_2):
+    #pl_1 = np.asarray(pixel_list_1)
+    #pl_2 = np.asarray(pixel_list_2)
+    diff = list((collections.Counter(pixel_list_1) - collections.Counter(pixel_list_2)).elements())
+    count = len(diff)
+    return count
 
+
+
+
+
+
+
+
+
+def encrypt_image(pixels, key):
+
+    pix_copy = []
+    for pix in pixels:
+        pix_copy.append((int(pix[0]), int(pix[1]), int(pix[2])))
+
+    return [encrypt(pixel, key) for pixel in pix_copy]
+
+def decrypt_image(encrypted_pixels, key):
+    inv = slow_exp_inverse((256**3) + 1, key)
+
+    enc_pix = []
+    for pix in encrypted_pixels:
+        enc_pix.append((int(pix[0]), int(pix[1]), int(pix[2])))
+
+    return [decrypt_exp_2(pixel, key, inv) for pixel in enc_pix]
+
+def jumble_image(pixels, P, Q):
+    P_1 = P
+    P_2 = Q
+
+    width = P_1.shape[0]
+    height = P_2.shape[0]
+
+    unjum_pix = []
+    for pix in pixels:
+        unjum_pix.append((int(pix[0]), int(pix[1]), int(pix[2])))
+
+    indices = [rgb_to_index(pixel) for pixel in unjum_pix]
+
+    inds = np.asarray(indices)
+
+    square_inds = inds.reshape([width, height])
+    square_inds = P_1.dot(square_inds).dot(P_2)
+
+    jumbled_inds = square_inds.reshape([width * height, 1])
+    return [index_to_rgb(index) for index in jumbled_inds]
+
+def unjumble_image(jumbled_pixels, P_1, P_2):
+    
+    width = P_1.shape[0]
+    height = P_2.shape[0]
+
+    jum_pix = []
+    for pix in jumbled_pixels:
+        jum_pix.append((int(pix[0]), int(pix[1]), int(pix[2])))
+
+    indices = [rgb_to_index(pixel) for pixel in jum_pix]
+    
+    inds = np.asarray(indices)
+
+    square_inds = inds.reshape([width, height])
+
+    # The transpose of a permutation matrix is its inverse
+    square_inds = (P_1.T).dot(square_inds).dot(P_2.T)
+
+    jumbled_inds = square_inds.reshape([width * height, 1])
+    return [index_to_rgb(index) for index in jumbled_inds]
+    
+    
 
 
 
 ##--------------------------- EXECUTABLE CODE ------------------------##
 
-IMAGE_NAME = "landscape.jpg"
+IMAGE_NAME = "landscape"
+JPG_EXT = ".jpg"
 
 # Set constants for graphics in pygame
 WIN_OFFSET = 10
@@ -238,6 +341,7 @@ WINDOW_HEIGHT = IMAGE_HEIGHT + 2 * WIN_OFFSET
 
 # Determine the number of pixels in our desired image
 NUM_PIXELS = 202500
+#NUM_PIXELS = 14400
 SQRT_NUM_PIXELS = int(NUM_PIXELS ** 0.5)
 
 # Compute the width and height of each "pixel" in our image
@@ -245,28 +349,46 @@ RECT_WIDTH = IMAGE_WIDTH / SQRT_NUM_PIXELS
 RECT_HEIGHT = IMAGE_HEIGHT / SQRT_NUM_PIXELS
 
 
+# Key selected randomly. Can pick any prime in Z_{(256^3) + 1}
+key = 24421
+
+print "\nGetting image"
+
+# Get the pixels of a given image and find the pixels we are interested in
+im = Image.open(IMAGE_NAME + "_encrypted" + JPG_EXT)
+pix = im.load()
+pos_x = [(i * (im.size[0] - 1)) / (SQRT_NUM_PIXELS - 1) for i in range(SQRT_NUM_PIXELS)]
+pos_y = [(i * (im.size[1] - 1)) / (SQRT_NUM_PIXELS - 1) for i in range(SQRT_NUM_PIXELS)]
+positions = list(itertools.product(pos_y, pos_x))
+
+pixels = [pix[pos[1], pos[0]] for pos in positions]
+
+P_1_list = np.random.permutation(range(SQRT_NUM_PIXELS))
+P_2_list = np.random.permutation(range(SQRT_NUM_PIXELS))
+
+P_1 = list_to_matrix(P_1_list)
+P_2 = list_to_matrix(P_2_list)
+
+
+print "Unjumbling jumbled image"
+unjumbled_pixels = unjumble_image(pixels, P_1, P_2)
+
+print "Decrypting pixels"
+decrypted_pixels = decrypt_image(unjumbled_pixels, key)
+
+print "Creating new Image"
+unjum_pix = np.asarray(unjumbled_pixels).reshape([SQRT_NUM_PIXELS, SQRT_NUM_PIXELS, 3])
+im = Image.fromarray(unjum_pix.astype('uint8'))
+im.save(IMAGE_NAME + "_decrypted" + JPG_EXT)
+
+
+print "Initializing pygame"
+
 # Boot up a pygame window and adjust size
 pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-# Key selected randomly. Can pick any prime in Z_{(256^3) + 1}
-key = 24421
-
-# Get the pixels of a given image and find the pixels we are interested in
-im = Image.open(IMAGE_NAME)
-pix = im.load()
-pos_x = [(i * (im.size[0] - 1)) / (SQRT_NUM_PIXELS - 1) for i in range(SQRT_NUM_PIXELS)]
-pos_y = [(i * (im.size[1] - 1)) / (SQRT_NUM_PIXELS - 1) for i in range(SQRT_NUM_PIXELS)]
-positions = list(itertools.product(pos_x, pos_y))
-
-pixels = [pix[pos[0], pos[1]] for pos in positions]
-
-
-# Encrypt all the random pixels
-encrypted_pixels = [encrypt(pixel, key) for pixel in pixels]
-
-# Get the exponential inverse of our key
-inv = slow_exp_inverse((256**3) + 1, key)
+print "Drawing images"
 
 # Produce our 3 images: the image on the left will be our "plaintext" image.
 # In the center we have the encrypted image, and on the right we have the 
@@ -281,8 +403,8 @@ for i in range(3):
     for j in range(len(pixels)):
 
         # Set the x, y, width, and length of the current pixel we are drawing
-        rectCoords = (WIN_OFFSET + i * (IMAGE_WIDTH + WIN_OFFSET) + (y * RECT_WIDTH), 
-                      WIN_OFFSET + (x * RECT_HEIGHT),
+        rectCoords = (WIN_OFFSET + i * (IMAGE_WIDTH + WIN_OFFSET) + (x * RECT_WIDTH), 
+                      WIN_OFFSET + (y * RECT_HEIGHT),
                       RECT_WIDTH,
                       RECT_HEIGHT)
 
@@ -299,19 +421,21 @@ for i in range(3):
             pygame.draw.rect(screen, pixels[j], rectCoords, 0)
         elif (i == 1):
             # We are drawing our encypted image
-            pygame.draw.rect(screen, encrypted_pixels[j], rectCoords, 0)
+            pygame.draw.rect(screen, unjumbled_pixels[j], rectCoords, 0)
         elif (i == 2):
             # We are drawing our decrypted image
-            #pygame.draw.rect(screen, decrypt_exp(encrypted_pixels[j], key), rectCoords, 0)
-            pygame.draw.rect(screen, decrypt_exp_2(encrypted_pixels[j], key, inv), rectCoords, 0)
+            pygame.draw.rect(screen, decrypted_pixels[j], rectCoords, 0)
 
             # Update for sanity
-            #if(x % SQRT_NUM_PIXELS == 0):
-            #    print str(y * SQRT_NUM_PIXELS + x) + " pixels decrypted"
+            #if(x % SQRT_NUM_PIXELS == 0 and y % 20 == 0):
+            #    print str(y * SQRT_NUM_PIXELS) + " pixels decrypted"
 
     # Update the display once all pixel values in the image have been determined
     pygame.display.update()
 
+print "Images drawn\n"
+
 # Continue to pass indefinitely so that pygame does not exit
-while(True):
-    pass
+sleep(5)
+print "Exiting\n"
+
