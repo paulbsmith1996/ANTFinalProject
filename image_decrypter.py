@@ -44,27 +44,6 @@ from time import sleep
 ##--------------------- ENCRYPTION / DECRYPTION FUNCTIONS ---------------------##
 
 
-# Encrypt a pixel's rgb value using the given key
-def encrypt(rgb, key):
-
-    # Write your rgb tuple as a number in a sequence of length 256^3 
-    index = rgb_to_index(rgb)
-
-    # Find the index of your encrypted pixel in your sequence
-    new_index = exponentiation((256 ** 3) + 1, index, key)
-
-    # Verify that the new index obtained is not 0
-    if(new_index == 0):
-        print "new_index is 0"
-        return
-
-    # Find the rgb value associated to the new (encrypted) index
-    new_rgb = index_to_rgb(new_index)
-
-    return new_rgb
-
-
-
 # Computes the value of the original pixel, given its encryped associate
 # Note that this method is extermely slow, as it brute forces the problem
 def decrypt(encrypted_rgb, key):
@@ -224,7 +203,6 @@ def matrix_to_list(mat):
 
 
 
-# Returns a list representation of the prime factors of num
 def factorization(num):
     
     factors = []
@@ -247,28 +225,7 @@ def factorization(num):
 
     return factors
 
-def compare_pixels(pixel_list_1, pixel_list_2):
-    #pl_1 = np.asarray(pixel_list_1)
-    #pl_2 = np.asarray(pixel_list_2)
-    diff = list((collections.Counter(pixel_list_1) - collections.Counter(pixel_list_2)).elements())
-    count = len(diff)
-    return count
 
-
-
-
-
-
-
-
-
-def encrypt_image(pixels, key):
-
-    pix_copy = []
-    for pix in pixels:
-        pix_copy.append((int(pix[0]), int(pix[1]), int(pix[2])))
-
-    return [encrypt(pixel, key) for pixel in pix_copy]
 
 def decrypt_image(encrypted_pixels, key):
     inv = slow_exp_inverse((256**3) + 1, key)
@@ -279,26 +236,6 @@ def decrypt_image(encrypted_pixels, key):
 
     return [decrypt_exp_2(pixel, key, inv) for pixel in enc_pix]
 
-def jumble_image(pixels, P, Q):
-    P_1 = P
-    P_2 = Q
-
-    width = P_1.shape[0]
-    height = P_2.shape[0]
-
-    unjum_pix = []
-    for pix in pixels:
-        unjum_pix.append((int(pix[0]), int(pix[1]), int(pix[2])))
-
-    indices = [rgb_to_index(pixel) for pixel in unjum_pix]
-
-    inds = np.asarray(indices)
-
-    square_inds = inds.reshape([width, height])
-    square_inds = P_1.dot(square_inds).dot(P_2)
-
-    jumbled_inds = square_inds.reshape([width * height, 1])
-    return [index_to_rgb(index) for index in jumbled_inds]
 
 def unjumble_image(jumbled_pixels, P_1, P_2):
     
@@ -309,7 +246,7 @@ def unjumble_image(jumbled_pixels, P_1, P_2):
     for pix in jumbled_pixels:
         jum_pix.append((int(pix[0]), int(pix[1]), int(pix[2])))
 
-    indices = [rgb_to_index(pixel) for pixel in jum_pix]
+    indices = [rgb_to_index(pixel) for pixel in jumbled_pixels]
     
     inds = np.asarray(indices)
 
@@ -328,7 +265,12 @@ def unjumble_image(jumbled_pixels, P_1, P_2):
 ##--------------------------- EXECUTABLE CODE ------------------------##
 
 IMAGE_NAME = "landscape"
+PNG_EXT = ".png"
 JPG_EXT = ".jpg"
+TXT_EXT = ".txt"
+
+KEY_EXT = "_key"
+MATRIX_EXT = "_matrix"
 
 # Set constants for graphics in pygame
 WIN_OFFSET = 10
@@ -341,7 +283,6 @@ WINDOW_HEIGHT = IMAGE_HEIGHT + 2 * WIN_OFFSET
 
 # Determine the number of pixels in our desired image
 NUM_PIXELS = 202500
-#NUM_PIXELS = 14400
 SQRT_NUM_PIXELS = int(NUM_PIXELS ** 0.5)
 
 # Compute the width and height of each "pixel" in our image
@@ -349,13 +290,10 @@ RECT_WIDTH = IMAGE_WIDTH / SQRT_NUM_PIXELS
 RECT_HEIGHT = IMAGE_HEIGHT / SQRT_NUM_PIXELS
 
 
-# Key selected randomly. Can pick any prime in Z_{(256^3) + 1}
-key = 24421
-
 print "\nGetting image"
 
 # Get the pixels of a given image and find the pixels we are interested in
-im = Image.open(IMAGE_NAME + "_encrypted" + JPG_EXT)
+im = Image.open(IMAGE_NAME + "_encrypted" + PNG_EXT)
 pix = im.load()
 pos_x = [(i * (im.size[0] - 1)) / (SQRT_NUM_PIXELS - 1) for i in range(SQRT_NUM_PIXELS)]
 pos_y = [(i * (im.size[1] - 1)) / (SQRT_NUM_PIXELS - 1) for i in range(SQRT_NUM_PIXELS)]
@@ -363,8 +301,58 @@ positions = list(itertools.product(pos_y, pos_x))
 
 pixels = [pix[pos[1], pos[0]] for pos in positions]
 
-P_1_list = np.random.permutation(range(SQRT_NUM_PIXELS))
-P_2_list = np.random.permutation(range(SQRT_NUM_PIXELS))
+print "Getting key"
+
+key_file = open(IMAGE_NAME + KEY_EXT + TXT_EXT)
+key = int(key_file.readline())
+key_file.close()
+
+print key
+
+print "Getting matrices"
+
+P_1_list = []
+P_2_list = []
+
+matrix_file = open(IMAGE_NAME + MATRIX_EXT + TXT_EXT)
+
+second_mat = False
+
+for line in matrix_file:
+    for word in line.split():
+        
+        if "[" in word and "]" not in word:
+            new_word = word[1:]
+
+            if(not second_mat):
+                P_1_list.append(int(new_word))
+            else:
+                P_2_list.append(int(new_word))
+
+        elif "]" in word:
+            new_word_1 = word[0:word.find("]")]
+            new_word_2 = word[word.find("[") + 1:]
+
+            if(not second_mat):
+                P_1_list.append(int(new_word_1))
+                P_2_list.append(int(new_word_2))
+            else:
+                P_2_list.append(int(new_word_1))
+
+            second_mat = True
+
+        else:
+            new_word = word
+
+            if(not second_mat):
+                P_1_list.append(int(new_word))
+            else:
+                P_2_list.append(int(new_word))
+
+
+
+
+matrix_file.close()
 
 P_1 = list_to_matrix(P_1_list)
 P_2 = list_to_matrix(P_2_list)
@@ -376,8 +364,8 @@ unjumbled_pixels = unjumble_image(pixels, P_1, P_2)
 print "Decrypting pixels"
 decrypted_pixels = decrypt_image(unjumbled_pixels, key)
 
-print "Creating new Image"
-unjum_pix = np.asarray(unjumbled_pixels).reshape([SQRT_NUM_PIXELS, SQRT_NUM_PIXELS, 3])
+print "Saving unencrypted Image"
+unjum_pix = np.asarray(decrypted_pixels).reshape([SQRT_NUM_PIXELS, SQRT_NUM_PIXELS, 3])
 im = Image.fromarray(unjum_pix.astype('uint8'))
 im.save(IMAGE_NAME + "_decrypted" + JPG_EXT)
 

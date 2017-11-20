@@ -328,7 +328,13 @@ def unjumble_image(jumbled_pixels, P_1, P_2):
 ##--------------------------- EXECUTABLE CODE ------------------------##
 
 IMAGE_NAME = "landscape"
+PNG_EXT = ".png"
 JPG_EXT = ".jpg"
+TXT_EXT = ".txt"
+
+ENCRYPT_TAG = "_encrypted"
+KEY_TAG = "_key"
+MATRIX_TAG = "_matrix"
 
 # Set constants for graphics in pygame
 WIN_OFFSET = 10
@@ -364,14 +370,23 @@ positions = list(itertools.product(pos_y, pos_x))
 pixels = [pix[pos[1], pos[0]] for pos in positions]
 
 P_1_list = np.random.permutation(range(SQRT_NUM_PIXELS))
-#print P_1_list
 P_2_list = np.random.permutation(range(SQRT_NUM_PIXELS))
 
 P_1 = list_to_matrix(P_1_list)
 P_2 = list_to_matrix(P_2_list)
 
+print "Saving key"
 
+key_file = open(IMAGE_NAME + KEY_TAG + TXT_EXT, "w+")
+key_file.write(str(key))
+key_file.close()
 
+print "Saving permutation matrices"
+
+mat_file = open(IMAGE_NAME + MATRIX_TAG + TXT_EXT, "w+")
+mat_file.write(str(P_1_list))
+mat_file.write(str(P_2_list))
+mat_file.close()
 
 
 print "Encrypting pixels"
@@ -380,10 +395,10 @@ encrypted_pixels = encrypt_image(pixels, key)
 print "Jumbling image"
 jumbled_pixels = jumble_image(encrypted_pixels, P_1, P_2)
 
-print "Creating new Image"
+print "Saving encrypted Image"
 jum_pix = np.asarray(jumbled_pixels).reshape([SQRT_NUM_PIXELS, SQRT_NUM_PIXELS, 3])
 im = Image.fromarray(jum_pix.astype('uint8'))
-im.save(IMAGE_NAME + "_encrypted" + JPG_EXT)
+im.save(IMAGE_NAME + "_encrypted" + PNG_EXT)
 
 print "Unjumbling jumbled image"
 unjumbled_pixels = unjumble_image(jumbled_pixels, P_1, P_2)
@@ -392,13 +407,13 @@ print "Decrypting pixels"
 decrypted_pixels = decrypt_image(unjumbled_pixels, key)
 
 
-print "Initializing pygame"
+print "Initializing pygame\n"
 
 # Boot up a pygame window and adjust size
 pygame.init()
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-print "Drawing images"
+print "\nDrawing images"
 
 # Produce our 3 images: the image on the left will be our "plaintext" image.
 # In the center we have the encrypted image, and on the right we have the 
