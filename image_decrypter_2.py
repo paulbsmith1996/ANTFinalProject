@@ -38,7 +38,7 @@ import numpy as np
 from PIL import Image
 from time import sleep
 
-from rgb_encrypter_jumble import Encrypter
+from rgb_encrypter_jumble_2 import Encrypter
 
 
 ##--------------------- ENCRYPTION / DECRYPTION FUNCTIONS ---------------------##
@@ -273,9 +273,13 @@ class Decrypter:
 
     def __init__(self, image_name):
 
+        print "Decrypter Started"
         if image_name is None:
             print "Indicate a file to decrypt"
             return 
+
+        self.im_width = 0
+        self.im_height = 0
         
         self.image_name = image_name
         self.pixels = self.get_image()
@@ -296,8 +300,12 @@ class Decrypter:
         # Get the pixels of a given image and find the pixels we are interested in
         im = Image.open(self.image_name + "_encrypted" + Encrypter.PNG_EXT)
         pix = im.load()
-        pos_x = [(i * (im.size[0] - 1)) / (Encrypter.SQRT_NUM_PIXELS - 1) for i in range(Encrypter.SQRT_NUM_PIXELS)]
-        pos_y = [(i * (im.size[1] - 1)) / (Encrypter.SQRT_NUM_PIXELS - 1) for i in range(Encrypter.SQRT_NUM_PIXELS)]
+
+        self.im_width = im.size[0]
+        self.im_height = im.size[1]
+
+        pos_x = [(i * (im.size[0] - 1)) / (self.im_width - 1) for i in range(self.im_width)]
+        pos_y = [(i * (im.size[1] - 1)) / (self.im_height - 1) for i in range(self.im_height)]
         positions = list(itertools.product(pos_y, pos_x))
 
         pixels = [pix[pos[1], pos[0]] for pos in positions]
@@ -370,7 +378,7 @@ class Decrypter:
         decrypted_pixels = decrypt_image(unjumbled_pixels, key)
 
         print "Saving unencrypted Image"
-        unjum_pix = np.asarray(decrypted_pixels).reshape([Encrypter.SQRT_NUM_PIXELS, Encrypter.SQRT_NUM_PIXELS, 3])
+        unjum_pix = np.asarray(decrypted_pixels).reshape([self.im_width, self.im_height, 3])
         im = Image.fromarray(unjum_pix.astype('uint8'))
         im.save(self.image_name + "_decrypted" + Encrypter.JPG_EXT)
 
@@ -399,15 +407,14 @@ class Decrypter:
             for j in range(len(pixels)):
 
                 # Set the x, y, width, and length of the current pixel we are drawing
-                rectCoords = (Encrypter.WIN_OFFSET + i * (Encrypter.IMAGE_WIDTH + Encrypter.WIN_OFFSET) + (x * Encrypter.RECT_WIDTH), 
-                              Encrypter.WIN_OFFSET + (y * Encrypter.RECT_HEIGHT),
-                              Encrypter.RECT_WIDTH,
-                              Encrypter.RECT_HEIGHT)
+                rectCoords = (Encrypter.WIN_OFFSET + i * (Encrypter.IMAGE_WIDTH + Encrypter.WIN_OFFSET) + x, 
+                              Encrypter.WIN_OFFSET + y,
+                              1, 1)
 
                 # Update our image coordinates correctly
                 x = x + 1
                 # if(x % SQRT_NUM_PIXELS == 0):
-                if(x % Encrypter.SQRT_NUM_PIXELS == 0):
+                if(x % self.im_height == 0):
                     x = 0
                     y = y + 1
             
@@ -432,4 +439,7 @@ class Decrypter:
         print "Exiting\n"
 
 
-d = Decrypter("dog")
+if len(sys.argv) > 1:
+    d = Decrypter(sys.argv[1])
+else:
+    d = Decrypter(None)

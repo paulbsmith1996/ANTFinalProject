@@ -225,7 +225,7 @@ def factorization(num):
 
 ##--------------------------- EXECUTABLE CODE ------------------------##
 
-IMAGE_NAME = "landscape.jpg"
+IMAGE_NAME = "dog.jpg"
 
 # Set constants for graphics in pygame
 WIN_OFFSET = 10

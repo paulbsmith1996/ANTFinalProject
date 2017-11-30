@@ -1,2 +1,5 @@
 *.jpg
 *_pic.py
+*_key.txt
+*_matrix.txt
+*_encrypted.png

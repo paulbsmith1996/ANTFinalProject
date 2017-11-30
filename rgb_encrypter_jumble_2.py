@@ -390,13 +390,8 @@ class Encrypter:
     WINDOW_HEIGHT = IMAGE_HEIGHT + 2 * WIN_OFFSET
 
     # Determine the number of pixels in our desired image
-    NUM_PIXELS = 202500
+    NUM_PIXELS = 400 * 600
     SQRT_NUM_PIXELS = int(NUM_PIXELS ** 0.5)
-
-    # Compute the width and height of each "pixel" in our image
-    RECT_WIDTH = IMAGE_WIDTH / SQRT_NUM_PIXELS
-    RECT_HEIGHT = IMAGE_HEIGHT / SQRT_NUM_PIXELS
-
 
     # Encrypts plain text image, then displays the plain text, encrypted, and decrypted images
     # all side-by-side
@@ -406,6 +401,15 @@ class Encrypter:
             return
 
         self.image_name = image_name
+
+    def run(self):
+
+        print "Encrypter started"
+        self.im_width  = 0
+        self.im_height = 0
+
+        self.rect_width = 1
+        self.rect_height = 1
 
         # Get the pixel information from the image with file name "image_name"
         self.pixels = self.get_image()
@@ -440,10 +444,18 @@ class Encrypter:
         im = Image.open(self.image_name + Encrypter.JPG_EXT)
         pix = im.load()
 
+        hw_ratio = float(im.size[1]) / float(im.size[0])
+
+        self.im_width = int((float(Encrypter.NUM_PIXELS) / hw_ratio) ** 0.5)
+        self.im_height = Encrypter.NUM_PIXELS / self.im_width
+
+        #self.rect_width = int(float(Encrypter.IMAGE_WIDTH) / float(self.im_width))
+        #self.rect_height = int(float(Encrypter.IMAGE_HEIGHT) / float(self.im_height))
+
         # We are only finding a small subset of pixels (in this version). This significantly speeds up encryption
         # process and significantly decreases resolution.
-        pos_x = [(i * (im.size[0] - 1)) / (Encrypter.SQRT_NUM_PIXELS - 1) for i in range(Encrypter.SQRT_NUM_PIXELS)]
-        pos_y = [(i * (im.size[1] - 1)) / (Encrypter.SQRT_NUM_PIXELS - 1) for i in range(Encrypter.SQRT_NUM_PIXELS)]
+        pos_x = [(i * (im.size[0] - 1)) / (self.im_width - 1) for i in range(self.im_width)]
+        pos_y = [(i * (im.size[1] - 1)) / (self.im_height - 1) for i in range(self.im_height)]
         positions = list(itertools.product(pos_y, pos_x))
         
         return [pix[pos[1], pos[0]] for pos in positions]
@@ -457,8 +469,8 @@ class Encrypter:
 
         # Generate 2 permutation matrices, whose sizes are determined by the 
         # NUM_PIXELS parameter.
-        P_1_list = np.random.permutation(range(Encrypter.SQRT_NUM_PIXELS))
-        P_2_list = np.random.permutation(range(Encrypter.SQRT_NUM_PIXELS))
+        P_1_list = np.random.permutation(range(self.im_width))
+        P_2_list = np.random.permutation(range(self.im_height))
 
         P_1 = list_to_matrix(P_1_list)
         P_2 = list_to_matrix(P_2_list)
@@ -493,7 +505,7 @@ class Encrypter:
 
         # Save encrypted image to appropriately named file
         print "Saving encrypted Image"
-        jum_pix = np.asarray(jumbled_pixels).reshape([Encrypter.SQRT_NUM_PIXELS, Encrypter.SQRT_NUM_PIXELS, 3])
+        jum_pix = np.asarray(jumbled_pixels).reshape([self.im_width, self.im_height, 3])
         im = Image.fromarray(jum_pix.astype('uint8'))
         im.save(self.image_name + "_encrypted" + Encrypter.PNG_EXT)
 
@@ -538,15 +550,15 @@ class Encrypter:
             for j in range(len(plain_pix)):
 
                 # Set the x, y, width, and length of the current pixel we are drawing
-                rectCoords = (Encrypter.WIN_OFFSET + i * (Encrypter.IMAGE_WIDTH + Encrypter.WIN_OFFSET) + (x * Encrypter.RECT_WIDTH), 
-                              Encrypter.WIN_OFFSET + (y * Encrypter.RECT_HEIGHT),
-                              Encrypter.RECT_WIDTH,
-                              Encrypter.RECT_HEIGHT)
+                rectCoords = (Encrypter.WIN_OFFSET + i * (Encrypter.IMAGE_WIDTH + Encrypter.WIN_OFFSET) + (x * self.rect_width), 
+                              Encrypter.WIN_OFFSET + (y * self.rect_height),
+                              self.rect_width,
+                              self.rect_height)
 
                 # Update our image coordinates correctly
                 x = x + 1
                 # if(x % SQRT_NUM_PIXELS == 0):
-                if(x % Encrypter.SQRT_NUM_PIXELS == 0):
+                if(x % self.im_width == 0):
                     x = 0
                     y = y + 1
             
@@ -578,6 +590,7 @@ class Encrypter:
 # Create a new Encrypter that encrypts the image in the file with the passed name
 if len(sys.argv) > 1:
     e = Encrypter(sys.argv[1])
+    e.run()
 else:
     # Program fails nicely on this Encrypter
     e = Encrypter(None)
