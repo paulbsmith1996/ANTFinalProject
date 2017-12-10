@@ -588,9 +588,9 @@ class Encrypter:
 
 
 # Create a new Encrypter that encrypts the image in the file with the passed name
-if len(sys.argv) > 1:
-    e = Encrypter(sys.argv[1])
-    e.run()
-else:
+#if len(sys.argv) > 1:
+#    e = Encrypter(sys.argv[1])
+#    e.run()
+#else:
     # Program fails nicely on this Encrypter
-    e = Encrypter(None)
+#    e = Encrypter(None)
