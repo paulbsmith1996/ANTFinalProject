@@ -421,10 +421,12 @@ class Encrypter:
         self.encrypted_pic = self.gen_encrypted_image(self.pixels, self.key, self.P_1, self.P_2)
 
         # Decrypt image to assure user of correct working
-        self.decrypted_pic = self.gen_decrypted_image(self.encrypted_pic, self.key, self.P_1, self.P_2)
+        #self.decrypted_pic = self.gen_decrypted_image(self.encrypted_pic, self.key, self.P_1, self.P_2)
 
         # Display the results of encryption and decryption using pygame
-        self.display_results(self.pixels, self.encrypted_pic, self.decrypted_pic)
+        #self.display_results(self.pixels, self.encrypted_pic, self.decrypted_pic)
+
+        return self.key, self.P_1, self.P_2
 
     # Generates a random key using a randomized algorithm, this should work better in expectation
     # than simply generating all primes less than (256 **3), and choosing one at random.
@@ -441,7 +443,7 @@ class Encrypter:
         print "\nGetting image"
 
         # Get the pixels of a given image and find the pixels we are interested in
-        im = Image.open(self.image_name + Encrypter.JPG_EXT)
+        im = Image.open(self.image_name)
         pix = im.load()
 
         hw_ratio = float(im.size[1]) / float(im.size[0])
@@ -477,13 +479,13 @@ class Encrypter:
 
         # Save key to an appropriately named file
         print "Saving key"
-        key_file = open(self.image_name + Encrypter.KEY_TAG + Encrypter.TXT_EXT, "w+")
+        key_file = open(self.image_name[:len(self.image_name) - 4] + Encrypter.KEY_TAG + Encrypter.TXT_EXT, "w+")
         key_file.write(str(key))
         key_file.close()
 
         # Save permutation matrices to an appropriately named file
         print "Saving permutation matrices"        
-        mat_file = open(self.image_name + Encrypter.MATRIX_TAG + Encrypter.TXT_EXT, "w+")
+        mat_file = open(self.image_name[:len(self.image_name) - 4] + Encrypter.MATRIX_TAG + Encrypter.TXT_EXT, "w+")
         mat_file.write(str(P_1_list))
         mat_file.write(str(P_2_list))
         mat_file.close()
@@ -507,7 +509,7 @@ class Encrypter:
         print "Saving encrypted Image"
         jum_pix = np.asarray(jumbled_pixels).reshape([self.im_width, self.im_height, 3])
         im = Image.fromarray(jum_pix.astype('uint8'))
-        im.save(self.image_name + "_encrypted" + Encrypter.PNG_EXT)
+        im.save(self.image_name[:len(self.image_name) - 4] + "_encrypted" + Encrypter.PNG_EXT)
 
         return jumbled_pixels
 

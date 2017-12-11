@@ -271,25 +271,25 @@ def unjumble_image(jumbled_pixels, P_1, P_2):
 
 class Decrypter:
 
-    def __init__(self, image_name):
+    def __init__(self, image):
 
         print "Decrypter Started"
-        if image_name is None:
+        if image is None:
             print "Indicate a file to decrypt"
             return 
 
         self.im_width = 0
         self.im_height = 0
         
-        self.image_name = image_name
+        self.image = image
         self.pixels = self.get_image()
 
-        self.key, self.P_1, self.P_2 = self.load_crypto()
+        #self.key, self.P_1, self.P_2 = self.load_crypto()
 
-        self.unjumbled_pixels, self.decrypted_pixels = self.gen_decrypted_image(self.pixels, self.key, 
-                                                                           self.P_1, self.P_2)
+        #self.unjumbled_pixels, self.decrypted_pixels = self.gen_decrypted_image(self.pixels, self.key, 
+        #                                                                   self.P_1, self.P_2)
 
-        self.display_results(self.pixels, self.unjumbled_pixels, self.decrypted_pixels)
+        #self.display_results(self.pixels, self.unjumbled_pixels, self.decrypted_pixels)
         
 
 
@@ -298,8 +298,10 @@ class Decrypter:
         print "\nGetting image"
 
         # Get the pixels of a given image and find the pixels we are interested in
-        im = Image.open(self.image_name + "_encrypted" + Encrypter.PNG_EXT)
+        #im = Image.open(self.image_name + "_encrypted" + Encrypter.PNG_EXT)
+        im = self.image
         pix = im.load()
+
 
         self.im_width = im.size[0]
         self.im_height = im.size[1]
@@ -379,15 +381,17 @@ class Decrypter:
         print "Decrypting pixels"
         decrypted_pixels = decrypt_image(unjumbled_pixels, key)
 
+        """
         print "Saving unencrypted Image"
         unjum_pix = np.asarray(decrypted_pixels).reshape([self.im_width, self.im_height, 3])
         im = Image.fromarray(unjum_pix.astype('uint8'))
         im.save(self.image_name + "_decrypted" + Encrypter.PNG_EXT)
+        """
 
         return (unjumbled_pixels, decrypted_pixels)
 
 
-    def display_results(self, pixels, unjumbled_pixels, decrypted_pixels):
+    def display_results(self, pixels):
         print "Initializing pygame\n"
 
         # Boot up a pygame window and adjust size
@@ -396,52 +400,33 @@ class Decrypter:
 
         print "\n\nDrawing images"
 
-        # Produce our 3 images: the image on the left will be our "plaintext" image.
-        # In the center we have the encrypted image, and on the right we have the 
-        # decrypted image
-        for i in range(3):
-    
-            # Keep track of our x and y coordiantes within the image we are displaying
-            x = 0
-            y = 0
+        # Keep track of our x and y coordiantes within the image we are displaying
+        x = 0
+        y = 0
+        
+        # Loop through all pixels in our images
+        for j in range(len(pixels)):
 
-            # Loop through all pixels in our images
-            for j in range(len(pixels)):
-
-                # Set the x, y, width, and length of the current pixel we are drawing
-                rectCoords = (Encrypter.WIN_OFFSET + i * (Encrypter.IMAGE_WIDTH + Encrypter.WIN_OFFSET) + x, 
+            # Set the x, y, width, and length of the current pixel we are drawing
+            rectCoords = (Encrypter.WIN_OFFSET + x, 
                               Encrypter.WIN_OFFSET + y,
                               1, 1)
 
-                # Update our image coordinates correctly
-                x = x + 1
-                # if(x % SQRT_NUM_PIXELS == 0):
-                if(x % self.im_height == 0):
-                    x = 0
-                    y = y + 1
+            # Update our image coordinates correctly
+            x = x + 1
+            # if(x % SQRT_NUM_PIXELS == 0):
+            if(x % self.im_height == 0):
+                x = 0
+                y = y + 1
             
         
-                if (i == 0):
-                    # We are drawing our original image
-                    pygame.draw.rect(screen, pixels[j], rectCoords, 0)
-                elif (i == 1):
-                    # We are drawing our encypted image
-                    pygame.draw.rect(screen, unjumbled_pixels[j], rectCoords, 0)
-                elif (i == 2):
-                    # We are drawing our decrypted image
-                    pygame.draw.rect(screen, decrypted_pixels[j], rectCoords, 0)
-
+            pygame.draw.rect(screen, pixels[j], rectCoords, 0)
+            
             # Update the display once all pixel values in the image have been determined
-            pygame.display.update()
+        pygame.display.update()
 
         print "Images drawn\n"
 
         # Continue to pass indefinitely so that pygame does not exit
         sleep(10)
         print "Exiting\n"
-
-
-if len(sys.argv) > 1:
-    d = Decrypter(sys.argv[1])
-else:
-    d = Decrypter(None)
