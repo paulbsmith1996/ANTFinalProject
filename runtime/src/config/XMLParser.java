@@ -1,7 +1,7 @@
-/* 
+/*
  * Copyright (C) 2008 Naom Nisan, Benny Pinkas, Assaf Ben-David.
  * See full copyright license terms in file ../GPL.txt
- * @author Assaf Ben-David 
+ * @author Assaf Ben-David
  */
 
 package config;
@@ -15,11 +15,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class XMLParser implements ConfigFile{
-		
+
 	Document _doc;
 	
 	public XMLParser(String configName) {
-		try {		
+		try {
 			File file = new File(configName);
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db;
@@ -27,12 +27,12 @@ public class XMLParser implements ConfigFile{
 			_doc = db.parse(file);
 			_doc.getDocumentElement().normalize();
 		}catch (Exception e){
-			System.err.println("Problem with opening the XML file: " 
+			System.err.println("Problem with opening the XML file: "
 					+ e.toString());
 			System.exit(1);
 		}
 	}
-	
+
 	private String get(String tag) {
 		//System.err.println("Tag " + tag + "=" + _doc.getElementsByTagName(tag).item(0).getTextContent().trim());
 		return _doc.getElementsByTagName(tag).item(0).getTextContent().trim();
@@ -44,16 +44,16 @@ public class XMLParser implements ConfigFile{
 		String [] str = res.split(",");
 		return str;
 	}
-	
+
 	public Hashtable<String,String> getPlayers() {
 		NodeList nl = _doc.getElementsByTagName("Player");
 		Hashtable<String,String> h = new Hashtable<String,String>();
 		int size = nl.getLength();
 		for (int i = 0 ; i < size ; i++){
-			String key = 
+			String key =
 				nl.item(i).getAttributes().item(0).getNodeValue().trim();
 			String val = nl.item(i).getTextContent().trim();
-			h.put(key , val);			
+			h.put(key , val);
 		}
 		return h;
 	}
@@ -68,7 +68,7 @@ public class XMLParser implements ConfigFile{
 		String tag = "Lambdas";
 		if (_doc.getElementsByTagName(tag).item(0) == null)
 			return null;
-		
+
 		return getArray(tag);
 	}
 

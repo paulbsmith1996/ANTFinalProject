@@ -1,25 +1,23 @@
-<?xml version="1.0" encoding="utf-8" ?> 
+<?xml version="1.0" encoding="utf-8" ?>
 
-<Fairplay2>	
+<Fairplay2>
 	<!--  The circuit file to compute -->
-	<Circuit>SecondPriceAuction-compiled.sfdl</Circuit>
+	<Circuit>Millionaires-compiled.sfdl</Circuit>
 
 	<!-- List of IP's of the computers involved in the computation. -->
 	<Participates>
 		<!-- List of players (IP or RP) -->
 		<Players>
-			<Player NameInFunction="bidder[0]">132.65.34.101</Player>
-			<Player NameInFunction="bidder[1]">132.65.34.102</Player>
-			<Player NameInFunction="bidder[2]">132.65.34.103</Player>
-			<Player NameInFunction="bidder[3]">132.65.34.104</Player>
-			<Player NameInFunction="seller">132.65.34.105</Player>
+			<Player NameInFunction="alice">192.168.178.26</Player>
+			<Player NameInFunction="bob">10.233.38.3</Player>
+			<Player NameInFunction="charlie">10.233.42.3</Player>
 		</Players>
 		<!-- List of IP of the CP -->
 		<ComputationPlayers>
-			132.65.34.101,132.65.34.102,132.65.34.103,132.65.34.104,132.65.34.105
+			10.233.45.1, 10.233.45.2, 10.233.45.3
 		</ComputationPlayers>
 	</Participates>
-	
+
 	<Security>
 		<Port>
 			12347
@@ -28,28 +26,28 @@
 		<K>
 			64
 		</K>
-		<!-- The prime number to use as modulo, modulo % 4 should be equal 3 -->		
+		<!-- The prime number to use as modulo, modulo % 4 should be equal 3 -->
 		<Modulo>
-			7687059820659762734436400120132358914012559163114450743465187757540858281651290901893442630998953		
+			353868019
 		</Modulo>
 		<!-- The protocol to use for the Pseudo Random Generator -->
 		<PRGProtocol>
 			SHA1PRNG
 		</PRGProtocol>
-		<!-- The certificates to use for the SSL connection -->	
+		<!-- The certificates to use for the SSL connection -->
 		<Certificate>
-			<keyStore>
-				certificate/ks
-			</keyStore>
-			<keyStorePassword>
-				123456
-			</keyStorePassword>
-			<trustStore>
-				certificate/ts
-			</trustStore>
-			<trustStorePassword>
-				123456
-			</trustStorePassword>
+			<KeyStore>
+				certificate/node1.keystore
+			</KeyStore>
+			<KeyStorePassword>
+				changeme
+			</KeyStorePassword>
+			<TrustStore>
+				certificate/custom.truststore
+			</TrustStore>
+			<TrustStorePassword>
+				trustchangeme
+			</TrustStorePassword>
 		</Certificate>
 	</Security>
 </Fairplay2>

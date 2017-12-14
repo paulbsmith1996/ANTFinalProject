@@ -1,1 +1,4 @@
 *.sh
+.DS_Store
+certificate
+*-compiled.*
