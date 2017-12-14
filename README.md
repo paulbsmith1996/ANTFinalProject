@@ -1,3 +1,5 @@
+# Image Encryption
+
 This program implements an interesting but likely unsound and expensive
 cryptographic scheme for images. The goal here is to produce make our
 image data readable at every level or our encryption protocol: the plain
@@ -27,6 +29,17 @@ Dependent on pygame and numpy libraries
 
 **Before you start, be aware that the current FairplayMP requires multiple physical/virtual machines to run it.**
 
+# Secure Multi-Party Computation
+
+We implement a "game" between 3 parties.
+
+Run as follows:
+```
+./setup-ssl.sh
+./build.sh
+./run.sh
+```
+
 Reference: [[Readme](http://www.cs.huji.ac.il/project/Fairplay/FairplayMP/Readme.txt)]
 
 Prerequisite
@@ -34,7 +47,7 @@ Prerequisite
 
 ``ant 1.8``, ``java``
 
-FairplayMP instructions 
+FairplayMP instructions
 ===
 
 Stage 1 - SFDL program:
@@ -58,7 +71,7 @@ mv *.Opt.fmt ..
 OR
 
 ```bash
-java  -cp compiler_v2_built/ sfdl.Compiler sfdl/SecondPriceAuction.sfdl 
+java  -cp compiler_v2_built/ sfdl.Compiler sfdl/SecondPriceAuction.sfdl
 ```
 
 (Compiler source code is not provided)

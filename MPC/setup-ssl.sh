@@ -5,7 +5,7 @@ keytool -genkeypair -keystore node1.keystore -keyalg RSA -alias node1 -dname "CN
 echo Keystore created with password: changeme
 
 echo Creating Certificate…
-keytool -exportcert -keystore node1.keystore -alias node1 -storepass 123456 -file node1.cer
+keytool -exportcert -keystore node1.keystore -alias node1 -storepass changeme -file node1.cer
 echo Certificate created
 
 echo Creating Truststore…
