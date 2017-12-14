@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 This program implements an interesting but likely unsound and expensive
 cryptographic scheme for images. The goal here is to produce make our
 image data readable at every level or our encryption protocol: the plain
@@ -25,7 +24,7 @@ factorized and this factorization can then be used to break our system
 quickly, though this is not necessarily obvious for large images.
 
 Dependent on pygame and numpy libraries
-=======
+
 **Before you start, be aware that the current FairplayMP requires multiple physical/virtual machines to run it.**
 
 Reference: [[Readme](http://www.cs.huji.ac.il/project/Fairplay/FairplayMP/Readme.txt)]
@@ -74,4 +73,3 @@ Stage 2 - Running the secure multiparty computation:
 ```bash
 java -cp runtime/build/classes FairplayMP <randomSeed>
 ```
->>>>>>> FairplayMP/master
