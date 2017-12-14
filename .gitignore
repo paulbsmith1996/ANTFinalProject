@@ -4,3 +4,7 @@
 *_key.txt
 *_matrix.txt
 *_encrypted.png
+*.sh
+.DS_Store
+certificate
+*-compiled.*
