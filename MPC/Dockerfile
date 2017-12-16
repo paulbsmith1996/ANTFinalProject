@@ -1,4 +1,6 @@
 FROM openjdk:9-slim
-COPY . /runtime
-WORKDIR /runtime
-CMD ["/usr/bin/java", "-version"]
+COPY . /
+WORKDIR /
+CMD ./run.sh
+# RUN "/usr/bin/java-version"
+# CMD awk 'END{print $1}' /etc/hosts

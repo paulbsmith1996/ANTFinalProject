@@ -8,13 +8,13 @@
 	<Participates>
 		<!-- List of players (IP or RP) -->
 		<Players>
-			<Player NameInFunction="alice">192.168.178.26</Player>
-			<Player NameInFunction="bob">10.233.38.3</Player>
+			<Player NameInFunction="alice">192.168.0.73</Player>
+			<Player NameInFunction="bob">172.17.0.2</Player>
 			<Player NameInFunction="charlie">10.233.42.3</Player>
 		</Players>
 		<!-- List of IP of the CP -->
 		<ComputationPlayers>
-			10.233.45.1, 10.233.45.2, 10.233.45.3
+			192.168.0.73, 172.17.0.2, 10.233.45.3
 		</ComputationPlayers>
 	</Participates>
 
