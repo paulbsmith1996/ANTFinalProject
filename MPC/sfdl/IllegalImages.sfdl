@@ -4,11 +4,11 @@
  * An illegal image provider could be e.g. a governement-provided compliance service.
  * At the end only the User and Dropbox know whether the image provided is illegal or not.
  * The input provided by each party is kept secret.
+ * For ease of computation, Dropbox and User only input one image at a time.
  **/
 program IllegalImages {
   // Global Constants
   const nImageHosters = 3; // must be odd
-  const nImages = 2; // number of images provided by Dropbox and each ImageHoster
   const illegalThreshold = 50; // image is illegal if: |illegalImage - image| < threshold
 
   // Global Variables
@@ -16,8 +16,8 @@ program IllegalImages {
 
   // Types
   type Image = Int<16>;
-  type Dropbox = struct{Image[nImages] input, Boolean output};
-  type ImageHoster = struct{Image[nImages] input, Boolean output};
+  type Dropbox = struct{Image input, Boolean output};
+  type ImageHoster = struct{Image input, Boolean output};
   type User = struct{Image input, Boolean output};
 
   // Computation
@@ -25,17 +25,27 @@ program IllegalImages {
     var Image image;
     image = user.input;
 
+    // check against imageHoster inputs
     for (i=1 to nImageHosters-1) {
-      for (j=1 to nImages-1) {
-        if (imageHoster[i].input[j] >= image) {
-          if (imageHoster[i].input[j] - image < illegalThreshold) {
-            isIllegal = true;
-          }
-        } else {
-          if (image - imageHoster[i].input[j] < illegalThreshold) {
-            isIllegal = true;
-          }
+      if (imageHoster[i].input >= image) {
+        if (imageHoster[i].input - image < illegalThreshold) {
+          isIllegal = true;
         }
+      } else {
+        if (image - imageHoster[i].input < illegalThreshold) {
+          isIllegal = true;
+        }
+      }
+    }
+
+    // check against Dropbox input
+    if (dropbox.input >= image) {
+      if (dropbox.input - image < illegalThreshold) {
+        isIllegal = true;
+      }
+    } else {
+      if (image - dropbox.input < illegalThreshold) {
+        isIllegal = true;
       }
     }
 
