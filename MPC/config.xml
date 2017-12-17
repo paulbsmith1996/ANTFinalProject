@@ -2,19 +2,21 @@
 
 <Fairplay2>
 	<!--  The circuit file to compute -->
-	<Circuit>Millionaires-compiled.sfdl</Circuit>
+	<Circuit>IllegalImages-compiled.sfdl</Circuit>
 
 	<!-- List of IP's of the computers involved in the computation. -->
 	<Participates>
 		<!-- List of players (IP or RP) -->
 		<Players>
-			<Player NameInFunction="alice">192.168.0.73</Player>
-			<Player NameInFunction="bob">172.17.0.2</Player>
-			<Player NameInFunction="charlie">10.233.42.3</Player>
+			<Player NameInFunction="imageHoster[0]">172.17.0.2</Player>
+			<Player NameInFunction="imageHoster[1]">172.17.0.3</Player>
+			<Player NameInFunction="imageHoster[2]">172.17.0.4</Player>
+			<Player NameInFunction="dropbox">172.17.0.5</Player>
+			<Player NameInFunction="user">172.17.0.6</Player>
 		</Players>
 		<!-- List of IP of the CP -->
 		<ComputationPlayers>
-			192.168.0.73, 172.17.0.2, 10.233.45.3
+			172.17.0.2, 172.17.0.3, 172.17.0.4, 172.17.0.5, 172.17.0.6
 		</ComputationPlayers>
 	</Participates>
 

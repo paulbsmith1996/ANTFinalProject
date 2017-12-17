@@ -13,8 +13,10 @@ program Millionaires{
   type Bob = struct {int input};
   type Charlie = struct {Boolean output};
 
-  function void main (Alice alice, Bob bob, Charlie charlie){
-    alice.output = (alice.input > bob.input);
-    charlie.output = (bob.input > alice.input);
+  function void main (Alice[2] alice, Bob bob, Charlie charlie){
+    alice[0].output = (alice[0].input > bob.input);
+    alice[1].output = (alice[1].input > alice[0].input)
+      && (alice[1].input > bob.input);
+    charlie.output = (bob.input > alice[0].input);
   }
 }

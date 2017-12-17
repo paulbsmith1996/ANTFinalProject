@@ -1,0 +1,47 @@
+/**
+ * Performs an illegal image check between 3 to n parties,
+ * with exactly one User, one Host (i.e. Dropbox) and at least one illegal image provider.
+ * An illegal image provider could be e.g. a governement-provided compliance service.
+ * At the end only the User and Dropbox know whether the image provided is illegal or not.
+ * The input provided by each party is kept secret.
+ **/
+program IllegalImages {
+  // Global Constants
+  const nImageHosters = 3; // must be odd
+  const nImages = 2; // number of images provided by Dropbox and each ImageHoster
+  const illegalThreshold = 50; // image is illegal if: |illegalImage - image| < threshold
+
+  // Global Variables
+  var Boolean isIllegal; // final value returned to Dropbox and User
+
+  // Types
+  type Image = Int<16>;
+  type Dropbox = struct{Image[nImages] input, Boolean output};
+  type ImageHoster = struct{Image[nImages] input, Boolean output};
+  type User = struct{Image input, Boolean output};
+
+  // Computation
+  function void main(Dropbox dropbox, User user, ImageHoster[nImageHosters] imageHoster) {
+    var Image image;
+    image = user.input;
+
+    for (i=1 to nImageHosters-1) {
+      for (j=1 to nImages-1) {
+        if (imageHoster[i].input[j] >= image) {
+          if (imageHoster[i].input[j] - image < illegalThreshold) {
+            isIllegal = true;
+          }
+        } else {
+          if (image - imageHoster[i].input[j] < illegalThreshold) {
+            isIllegal = true;
+          }
+        }
+      }
+    }
+
+    dropbox.output = isIllegal;
+    user.output = isIllegal;
+
+  }
+
+}
