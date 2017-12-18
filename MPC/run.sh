@@ -1,1 +1,5 @@
-java -cp runtime/build/classes FairplayMP 8dn832f28w824b2di83 -v
+#!/bin/bash
+
+java -cp runtime/build/classes FairplayMP $(openssl rand -base64 18) -v
+
+echo Done!

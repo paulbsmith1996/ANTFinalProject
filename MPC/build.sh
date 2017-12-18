@@ -1,15 +1,15 @@
 #!/bin/bash
 
 echo Building File...
-cp sfdl/Millionaires.sfdl compiler_v1_built/Millionaires-tocompile.sfdl
+cp sfdl/IllegalImages.sfdl compiler_v1_built/IllegalImages-tocompile.sfdl
 cd compiler_v1_built/compiler
-java lab.Runner -f ../Millionaires-tocompile.sfdl
+java lab.Runner -f ../IllegalImages-tocompile.sfdl
 cd ..
-ruby Convertor.rb Millionaires-tocompile.sfdl
+ruby Convertor.rb IllegalImages-tocompile.sfdl
 
 # generating files with .cnv, .Opt.circuit , .Opt.fmt
-mv *.cnv ../Millionaires-compiled.sfdl.cnv
-mv *.Opt.circuit ../Millionaires-compiled.sfdl.Opt.circuit
-mv *.Opt.fmt ../Millionaires-compiled.sfdl.Opt.fmt
+mv *.cnv ../IllegalImages-compiled.sfdl.cnv
+mv *.Opt.circuit ../IllegalImages-compiled.sfdl.Opt.circuit
+mv *.Opt.fmt ../IllegalImages-compiled.sfdl.Opt.fmt
 
 echo Done!

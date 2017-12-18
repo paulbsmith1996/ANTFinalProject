@@ -53,7 +53,7 @@ print "\nClient attempting to upload illegal picture " + ILLEGAL_PIC
 c.encrypt_image(ILLEGAL_PIC)
 print ""
 c.upload_image(ILLEGAL_PIC[:len(ILLEGAL_PIC) - 4] + "_encrypted.png", s)
-        
+
 
 print "\nClient retrieving images from server"
 c.retrieve_images(s)
