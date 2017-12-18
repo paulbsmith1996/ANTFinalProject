@@ -7,6 +7,7 @@
 	<!-- List of IP's of the computers involved in the computation. -->
 	<Participates>
 		<!-- List of players (IP or RP) -->
+		<!-- IP addresses in the default Docker (bridge0) network are within the range: 172.17.0.2 to 172.17.255.255 -->
 		<Players>
 			<Player NameInFunction="imageHoster[0]">172.17.0.2</Player>
 			<Player NameInFunction="imageHoster[1]">172.17.0.3</Player>
@@ -28,8 +29,9 @@
 		<K>
 			64
 		</K>
-		<!-- The prime number to use as modulo, modulo % 4 should be equal 3 -->
+		<!-- The prime number to use as modulo with X % 4 == 3 -->
 		<Modulo>
+			<!-- UPDATE: is incorrect in original FairPlay code -->
 			353868019
 		</Modulo>
 		<!-- The protocol to use for the Pseudo Random Generator -->
@@ -37,6 +39,7 @@
 			SHA1PRNG
 		</PRGProtocol>
 		<!-- The certificates to use for the SSL connection -->
+		<!-- UPDATE: do not modify. The Dockerfile runs setup-ssl.sh and creates the certificate/ directory. -->
 		<Certificate>
 			<KeyStore>
 				certificate/node1.keystore

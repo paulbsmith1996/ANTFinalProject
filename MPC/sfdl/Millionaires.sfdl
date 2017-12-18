@@ -1,4 +1,6 @@
 /*
+ * This is an example SFDL file provided in the original Fairplay repository.
+ *
  * Alice, Bob and Charlie are player types.
  * Alice has input and output, Bob only has an input and Charlie only has an output.
  * alice0, alice1, bob and charlie are the players who participate in the protocol.
