@@ -37,6 +37,7 @@ This program complements our Image Encryption above. Instead of using a hash fun
 Because of restrictions by the Fairplay language (see reference below), an image is represented as a number. Each player must provide exactly one image for the computation to work.
 
 Run as follows:
+* ``$ cd MPC/``
 * Modify constants in ``sfdl/IllegalImages.sfdl`` to the desired number of players and illegal image threshold
 * ``$ ./build.sh``
 * Modify players' IP addresses in ``config.xml``
